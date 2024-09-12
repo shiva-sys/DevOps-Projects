@@ -1,0 +1,41 @@
+name: SonarCloud Scan
+
+on:
+  # Run the analysis on every push to the main branch
+  push:
+    branches:
+      - main
+  # Optionally, you can run it on pull requests as well
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: Build and test the project
+        run: mvn clean install
+
+      - name: Run SonarCloud scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar \
+          -Dsonar.projectKey=YOUR_PROJECT_KEY \
+          -Dsonar.organization=YOUR_ORG_KEY \
+          -Dsonar.host.url=https://sonarcloud.io
